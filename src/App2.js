@@ -7,32 +7,42 @@ export default function App2() {
 }
 
 export function Game() {
+    const [xIsNext, setXIsNext] = useState(true);
     const [history, setHistory] = useState([Array(9).fill(null)]);
-    const currentSquares = history[history.length - 1];
+    const [currentMove, setCurrentMove] = useState(0);
+    const currentSquares = history[currentMove];
 
     function handlePlay(nextSquares) {
-        setHistory([...history, nextSquares]);
+        const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+        setHistory(nextHistory);
+        setCurrentMove(nextHistory.length - 1);
+        setXIsNext(!xIsNext);
     }
 
     // show history moves
     const moves = history.map((squares, move) => {
         let description;
         if (move > 0) {
-          description = 'Go to move #' + move;
+            description = 'Go to move #' + move;
         } else {
-          description = 'Go to game start';
+            description = 'Go to game start';
         }
         return (
-          <li key={move}>
-            <button onClick={() => jumpTo(move)}>{description}</button>
-          </li>
+            <li key={move}>
+                <button onClick={() => jumpTo(move)}>{description}</button>
+            </li>
         );
-      });
+    });
+
+    function jumpTo(move) {
+        setCurrentMove(move);
+        setXIsNext(move % 2 === 0);
+    }
 
     return (
         <div className="game">
             <div className="game-board">
-                <Board squares={currentSquares} onPlay={handlePlay} />
+                <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
             </div>
             <div className="game-info">
                 <ol>{moves}</ol>
@@ -41,8 +51,7 @@ export function Game() {
     );
 }
 
-export function Board({squares, onPlay}) {
-    const [xIsNext, setXIsNext] = useState(true);
+export function Board({xIsNext, squares, onPlay }) {
 
     // show status
     const winner = calculateWinner(squares);
@@ -86,7 +95,6 @@ export function Board({squares, onPlay}) {
             nextSquares[i] = "O";
         }
         onPlay(nextSquares);
-        setXIsNext(!xIsNext);
     }
 }
 
