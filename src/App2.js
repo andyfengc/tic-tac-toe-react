@@ -2,13 +2,47 @@ import { useState } from 'react';
 
 export default function App2() {
     return (
-        <Board></Board>
+        <Game></Game>
     );
 }
 
-export function Board() {
+export function Game() {
+    const [history, setHistory] = useState([Array(9).fill(null)]);
+    const currentSquares = history[history.length - 1];
+
+    function handlePlay(nextSquares) {
+        setHistory([...history, nextSquares]);
+    }
+
+    // show history moves
+    const moves = history.map((squares, move) => {
+        let description;
+        if (move > 0) {
+          description = 'Go to move #' + move;
+        } else {
+          description = 'Go to game start';
+        }
+        return (
+          <li key={move}>
+            <button onClick={() => jumpTo(move)}>{description}</button>
+          </li>
+        );
+      });
+
+    return (
+        <div className="game">
+            <div className="game-board">
+                <Board squares={currentSquares} onPlay={handlePlay} />
+            </div>
+            <div className="game-info">
+                <ol>{moves}</ol>
+            </div>
+        </div>
+    );
+}
+
+export function Board({squares, onPlay}) {
     const [xIsNext, setXIsNext] = useState(true);
-    const [squares, setSquares] = useState(Array(9).fill(null));
 
     // show status
     const winner = calculateWinner(squares);
@@ -51,7 +85,7 @@ export function Board() {
         else {
             nextSquares[i] = "O";
         }
-        setSquares(nextSquares);
+        onPlay(nextSquares);
         setXIsNext(!xIsNext);
     }
 }
